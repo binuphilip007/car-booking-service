@@ -4,6 +4,8 @@ import com.velocitymotors.carbooking.model.request.BookingRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
+
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Component
@@ -18,6 +20,11 @@ public class BookingValidator {
     }
 
     public void validate(BookingRequest request) {
+        if (!request.rentalStartDate().isAfter(LocalDateTime.now())) {
+            throw new ResponseStatusException(BAD_REQUEST,
+                    "rentalStartDate must be in the future");
+        }
+
         if (!request.rentalEndDate().isAfter(request.rentalStartDate())) {
             throw new ResponseStatusException(BAD_REQUEST,
                     "rentalEndDate must be after rentalStartDate");
