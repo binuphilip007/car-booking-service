@@ -1,0 +1,49 @@
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Maven wrapper
+.mvn/wrapper/maven-wrapper.properties
+
+# IDE - IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# IDE - Eclipse
+.classpath
+.project
+.settings/
+
+# VS Code
+.vscode/
+
+# Java
+*.class
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Environment / secrets
+.env
+.env.*
+*.secret
+
+# Spring Boot local configuration
+application-local.yml
+application-local.properties
+
+# Temporary files
+*.tmp
+*.temp
+
+# Build output
+out/
+
+# Docker
+docker-compose.override.yml
