@@ -5,6 +5,7 @@ import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryRegistry;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -16,8 +17,6 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.function.Supplier;
@@ -27,9 +26,9 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
 
 @Component
+@Slf4j
 public class CreditCardPaymentClientImpl implements CreditCardPaymentClient {
 
-    private static final Logger logger = LoggerFactory.getLogger(CreditCardPaymentClientImpl.class);
     private static final String RESILIENCE_INSTANCE = "creditCardValidation";
 
     private final RestTemplate restTemplate;
@@ -57,11 +56,11 @@ public class CreditCardPaymentClientImpl implements CreditCardPaymentClient {
         try {
             return resilientCall.get();
         } catch (CallNotPermittedException exception) {
-            logger.error("Credit-card validation circuit breaker is open; short-circuiting call", exception);
+            log.error("Credit-card validation circuit breaker is open; short-circuiting call", exception);
             throw new ResponseStatusException(
                     SERVICE_UNAVAILABLE, "Credit-card payment validation is unavailable", exception);
         } catch (CreditCardValidationUnavailableException exception) {
-            logger.error("Credit-card validation unavailable after retries were exhausted", exception);
+            log.error("Credit-card validation unavailable after retries were exhausted", exception);
             throw new ResponseStatusException(
                     SERVICE_UNAVAILABLE, "Credit-card payment validation is unavailable", exception);
         }
@@ -72,7 +71,7 @@ public class CreditCardPaymentClientImpl implements CreditCardPaymentClient {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         try {
-            logger.info("Calling credit-card validation service");
+            log.debug("Calling credit-card validation service");
             ResponseEntity<PaymentStatusResponse> responseEntity = restTemplate.postForEntity(
                     paymentStatusUrl,
                     new HttpEntity<>(Map.of("paymentReference", paymentReference), headers),
@@ -83,22 +82,22 @@ public class CreditCardPaymentClientImpl implements CreditCardPaymentClient {
                         BAD_GATEWAY, "Credit-card payment validation returned no payment status");
             }
             PaymentStatus paymentStatus = parseStatus(response.status());
-            logger.info(
+                log.debug(
                     "Credit-card validation completed status={} httpStatus={}",
                     paymentStatus,
                     responseEntity.getStatusCode());
             return paymentStatus;
         } catch (HttpClientErrorException.NotFound exception) {
-            logger.warn("Credit-card validation service did not recognise the payment reference", exception);
+            log.warn("Credit-card validation service did not recognise the payment reference", exception);
             throw new ResponseStatusException(
                     BAD_REQUEST, "Unknown credit-card payment reference", exception);
         } catch (HttpClientErrorException.BadRequest exception) {
-            logger.warn("Credit-card validation service rejected the payment reference as invalid", exception);
+            log.warn("Credit-card validation service rejected the payment reference as invalid", exception);
             throw new ResponseStatusException(
                     BAD_REQUEST, "Invalid credit-card payment reference", exception);
         } catch (HttpClientErrorException exception) {
             // undocumented client error (401/403/415/...); retrying will not change the outcome
-            logger.error("Credit-card validation service returned an undocumented client error", exception);
+            log.error("Credit-card validation service returned an undocumented client error", exception);
             throw new ResponseStatusException(
                     BAD_GATEWAY,
                     "Credit-card payment validation returned an unexpected response",
@@ -116,7 +115,7 @@ public class CreditCardPaymentClientImpl implements CreditCardPaymentClient {
         try {
             return PaymentStatus.valueOf(status);
         } catch (IllegalArgumentException exception) {
-            logger.error("Credit-card validation service returned an unsupported status={}", status);
+            log.error("Credit-card validation service returned an unsupported status={}", status);
             throw new ResponseStatusException(
                     BAD_GATEWAY,
                     "Credit-card payment validation returned an unsupported payment status",

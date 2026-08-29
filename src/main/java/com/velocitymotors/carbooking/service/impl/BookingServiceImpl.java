@@ -11,45 +11,41 @@ import com.velocitymotors.carbooking.repository.BookingRepository;
 import com.velocitymotors.carbooking.service.BookingService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.List;
 import com.velocitymotors.carbooking.validator.BookingValidator;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class BookingServiceImpl implements BookingService {
 
-    private static final Logger logger = LoggerFactory.getLogger(BookingServiceImpl.class);
-
     private final BookingRepository bookingRepository;
-    private final BookingValidator bookingValidator;
     private final CreditCardPaymentClient creditCardPaymentClient;
     private final AtomicLong bookingSequence = new AtomicLong(1);
-
-    public BookingServiceImpl(
-            BookingRepository bookingRepository,
-            BookingValidator bookingValidator,
-            CreditCardPaymentClient creditCardPaymentClient) {
-        this.bookingRepository = bookingRepository;
-        this.bookingValidator = bookingValidator;
-        this.creditCardPaymentClient = creditCardPaymentClient;
-    }
 
     @Override
     @Transactional
     public BookingResponse createBooking(BookingRequest request) {
-        bookingValidator.validate(request);
+        BookingValidator.validate(request);
+
+        String paymentReference = request.paymentReference().trim();
+        if (bookingRepository.existsByPaymentReference(paymentReference)) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "paymentReference is already in use");
+        }
 
         if (request.paymentMode() == PaymentMode.CREDIT_CARD) {
-            logger.info("Validating credit-card payment reference");
+            log.debug("Validating credit-card payment reference");
             CreditCardPaymentClient.PaymentStatus paymentStatus =
-                    creditCardPaymentClient.retrievePaymentStatus(request.paymentReference());
+                    creditCardPaymentClient.retrievePaymentStatus(paymentReference);
             if (paymentStatus != CreditCardPaymentClient.PaymentStatus.APPROVED) {
-            logger.warn("Credit-card payment was not approved");
+            log.warn("Credit-card payment was not approved");
                 throw new ResponseStatusException(
                         HttpStatus.PAYMENT_REQUIRED,
                         "Credit-card payment was not approved");
@@ -62,19 +58,20 @@ public class BookingServiceImpl implements BookingService {
             ? BookingStatus.PENDING_PAYMENT
             : BookingStatus.CONFIRMED;
 
-        Booking booking = new Booking(
-                bookingId,
-                request.customerName().trim(),
-                request.vehicleId().trim(),
-                request.rentalStartDate(),
-                request.rentalEndDate(),
-                request.vehicleCategory(),
-                request.paymentMode(),
-                request.paymentReference().trim(),
-                bookingStatus);
+        Booking booking = Booking.builder()
+            .bookingId(bookingId)
+            .customerName(request.customerName().trim())
+            .vehicleId(request.vehicleId().trim())
+            .rentalStartDate(request.rentalStartDate())
+            .rentalEndDate(request.rentalEndDate())
+            .vehicleCategory(request.vehicleCategory())
+            .paymentMode(request.paymentMode())
+            .paymentReference(paymentReference)
+            .bookingStatus(bookingStatus)
+            .build();
 
         bookingRepository.save(booking);
-        logger.info("Persisted booking bookingId={} paymentMode={} status={}",
+        log.debug("Persisted booking bookingId={} paymentMode={} status={}",
             bookingId, request.paymentMode(), bookingStatus);
         return toBookingResponse(booking);
     }
@@ -82,6 +79,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional(readOnly = true)
     public List<BookingDetailsResponse> getAllBookings() {
+        log.debug("Retrieving all bookings");
         return bookingRepository.findAll().stream()
             .map(this::toBookingDetailsResponse)
                 .toList();

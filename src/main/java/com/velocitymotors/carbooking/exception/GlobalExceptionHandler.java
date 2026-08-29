@@ -1,5 +1,6 @@
 package com.velocitymotors.carbooking.exception;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -7,13 +8,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.server.ResponseStatusException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
-
-    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> handleValidation(MethodArgumentNotValidException exception) {
@@ -21,20 +20,27 @@ public class GlobalExceptionHandler {
                 .findFirst()
                 .map(error -> error.getDefaultMessage())
                 .orElse("Invalid request");
-        logger.warn("Request validation failed: {}", message);
+        log.warn("Request validation failed: {}", message);
         return ResponseEntity.badRequest().body(new ApiError(message));
     }
 
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ApiError> handleStatus(ResponseStatusException exception) {
         HttpStatus status = HttpStatus.valueOf(exception.getStatusCode().value());
-        logger.warn("Request failed status={} reason={}", status.value(), exception.getReason());
+        log.warn("Request failed status={} reason={}", status.value(), exception.getReason());
         return ResponseEntity.status(status).body(new ApiError(exception.getReason()));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiError> handleDataIntegrityViolation(DataIntegrityViolationException exception) {
+        log.warn("Request violated a database constraint", exception);
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ApiError("paymentReference is already in use"));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiError> handleMalformedRequest(HttpMessageNotReadableException exception) {
-        logger.warn("Malformed request body", exception);
+        log.warn("Malformed request body", exception);
         return ResponseEntity.badRequest().body(new ApiError("Malformed request body"));
     }
 }

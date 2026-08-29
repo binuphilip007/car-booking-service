@@ -5,41 +5,49 @@ import com.velocitymotors.carbooking.model.entity.BookingStatus;
 import com.velocitymotors.carbooking.model.entity.PaymentMode;
 import com.velocitymotors.carbooking.model.payment.BankTransferPaymentEventRequest;
 import com.velocitymotors.carbooking.repository.BookingRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static java.math.BigDecimal.ZERO;
 
 @Component
+@RequiredArgsConstructor
+@Slf4j
 public class BankTransferPaymentEventListener {
 
     private static final String TRANSACTION_DETAILS_PATTERN = "^\\S{12}\\s+\\S{10}$";
-    private static final Logger logger = LoggerFactory.getLogger(BankTransferPaymentEventListener.class);
-
     private final BookingRepository bookingRepository;
-
-    public BankTransferPaymentEventListener(BookingRepository bookingRepository) {
-        this.bookingRepository = bookingRepository;
-    }
 
     @KafkaListener(
             topics = "${bank-transfer.payment-events-topic}",
             groupId = "${spring.kafka.consumer.group-id}")
     @Transactional
     public void handlePaymentEvent(BankTransferPaymentEventRequest event) {
+        log.debug("Received bank-transfer payment event");
         validatePaymentEvent(event);
 
         try {
             bookingRepository.findByPaymentReference(event.paymentId())
                     .ifPresentOrElse(booking -> {
+                        log.debug("Matched bookingId={} paymentMode={} bookingStatus={}",
+                            booking.getBookingId(), booking.getPaymentMode(), booking.getBookingStatus());
+                        String referencedBookingId = bookingIdFrom(event.transactionDetails());
+                        if (!booking.getBookingId().equals(referencedBookingId)) {
+                            log.warn("Booking id mismatch for paymentId={}: transactionDetails references bookingId={} "
+                                            + "but paymentReference maps to bookingId={}; event will be routed to DLT",
+                                    event.paymentId(), referencedBookingId, booking.getBookingId());
+                            throw mismatch(event.paymentId(),
+                                    "transactionDetails references bookingId " + referencedBookingId
+                                            + " but paymentReference maps to bookingId " + booking.getBookingId());
+                        }
                         if (booking.getPaymentMode() != PaymentMode.BANK_TRANSFER) {
                             throw mismatch(event.paymentId(), "payment mode is not BANK_TRANSFER");
                         }
                         if (booking.getBookingStatus() == BookingStatus.CONFIRMED) {
-                            logger.info("Ignoring duplicate bank-transfer payment event for already confirmed "
+                            log.debug("Ignoring duplicate bank-transfer payment event for already confirmed "
                                             + "bookingId={} paymentId={}",
                                     booking.getBookingId(), event.paymentId());
                             return;
@@ -49,17 +57,17 @@ public class BankTransferPaymentEventListener {
                         }
                         booking.confirm();
                         bookingRepository.save(booking);
-                        logger.info("Confirmed bank-transfer bookingId={} using paymentId={}",
-                                booking.getBookingId(), event.paymentId());
+                        log.debug("Confirmed bank-transfer bookingId={} using paymentId={}; status now {}",
+                                booking.getBookingId(), event.paymentId(), booking.getBookingStatus());
                     }, () -> {
-                        logger.warn("No pending bank-transfer booking matched paymentId={}",
+                        log.warn("No pending bank-transfer booking matched paymentId={}",
                                 event.paymentId());
                         throw mismatch(event.paymentId(), "no booking matched");
                     });
         } catch (InvalidBankTransferPaymentEventException exception) {
             throw exception;
         } catch (RuntimeException exception) {
-            logger.error("Database failure while processing paymentId={}; Kafka retry will be attempted",
+            log.error("Database failure while processing paymentId={}; Kafka retry will be attempted",
                     event.paymentId(), exception);
             throw exception;
         }
@@ -70,26 +78,46 @@ public class BankTransferPaymentEventListener {
                 "Invalid bank-transfer payment event for paymentId " + paymentId + ": " + reason);
     }
 
+    private String bookingIdFrom(String transactionDetails) {
+        return transactionDetails.trim().split("\\s+")[1];
+    }
+
     private void validatePaymentEvent(BankTransferPaymentEventRequest event) {
-        if (event == null
-            || event.paymentId() == null
-            || event.paymentId().isBlank()
-            || event.senderAccountNumber() == null
-            || event.senderAccountNumber().isBlank()
-                || event.paymentAmount() == null
-                || event.paymentAmount().compareTo(ZERO) <= 0) {
-            logger.warn("Invalid bank-transfer event amount or paymentId; event will be routed to DLT");
+        if (event == null) {
+            log.warn("Received null bank-transfer payment event; event will be routed to DLT");
+            throw new InvalidBankTransferPaymentEventException("Payment event payload is missing");
+        }
+        if (event.paymentId() == null || event.paymentId().isBlank()) {
+            log.warn("Missing paymentId in bank-transfer event; event will be routed to DLT");
+            throw new InvalidBankTransferPaymentEventException("Payment id must not be blank");
+        }
+        if (event.senderAccountNumber() == null || event.senderAccountNumber().isBlank()) {
+            log.warn("Missing senderAccountNumber for paymentId={}; event will be routed to DLT",
+                    event.paymentId());
             throw new InvalidBankTransferPaymentEventException(
-                    "Payment amount must be greater than zero");
+                    "Sender account number must not be blank for paymentId " + event.paymentId());
+        }
+        if (event.paymentAmount() == null) {
+            log.warn("Missing paymentAmount for paymentId={}; event will be routed to DLT", event.paymentId());
+            throw new InvalidBankTransferPaymentEventException(
+                    "Payment amount is missing for paymentId " + event.paymentId());
+        }
+        if (event.paymentAmount().compareTo(ZERO) <= 0) {
+            log.warn("Non-positive paymentAmount={} for paymentId={}; event will be routed to DLT",
+                    event.paymentAmount(), event.paymentId());
+            throw new InvalidBankTransferPaymentEventException(
+                    "Payment amount must be greater than zero for paymentId " + event.paymentId()
+                            + " but was " + event.paymentAmount());
         }
         if (event.transactionDetails() == null
             || !event.transactionDetails().matches(TRANSACTION_DETAILS_PATTERN)) {
-            logger.warn("Invalid transaction details for paymentId={}; event will be routed to DLT",
+                log.warn("Invalid transactionDetails for paymentId={}; event will be routed to DLT",
                     event.paymentId());
             throw new InvalidBankTransferPaymentEventException(
-                    "Transaction details must contain a 12-character transaction reference and 10-character booking ID");
+                    "Transaction details must contain a 12-character transaction reference and 10-character booking ID"
+                            + " for paymentId " + event.paymentId() + " but was '" + event.transactionDetails() + "'");
         }
-                logger.debug("Validated bank-transfer payment event paymentId={}", event.paymentId());
+                log.debug("Validated bank-transfer payment event paymentId={}", event.paymentId());
     }
 
     private boolean isPendingBankTransfer(Booking booking) {

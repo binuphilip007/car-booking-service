@@ -1,16 +1,25 @@
 package com.velocitymotors.carbooking.model.entity;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Builder;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+import jakarta.persistence.Column;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "bookings")
+@Table(name = "bookings", uniqueConstraints = {
+    @jakarta.persistence.UniqueConstraint(name = "uk_bookings_payment_reference", columnNames = "payment_reference")
+})
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Booking {
 
     @Id
@@ -26,6 +35,7 @@ public class Booking {
     @Enumerated(EnumType.STRING)
     private PaymentMode paymentMode;
 
+    @Column(name = "payment_reference", nullable = false)
     private String paymentReference;
 
     @Enumerated(EnumType.STRING)
@@ -34,9 +44,7 @@ public class Booking {
     @Version
     private Long version;
 
-    protected Booking() {
-    }
-
+    @Builder
     public Booking(String bookingId, String customerName, String vehicleId,
                    LocalDateTime rentalStartDate, LocalDateTime rentalEndDate,
                    VehicleCategory vehicleCategory, PaymentMode paymentMode,
@@ -51,16 +59,6 @@ public class Booking {
         this.paymentReference = paymentReference;
         this.bookingStatus = bookingStatus;
     }
-
-    public String getBookingId() { return bookingId; }
-    public String getCustomerName() { return customerName; }
-    public String getVehicleId() { return vehicleId; }
-    public LocalDateTime getRentalStartDate() { return rentalStartDate; }
-    public LocalDateTime getRentalEndDate() { return rentalEndDate; }
-    public VehicleCategory getVehicleCategory() { return vehicleCategory; }
-    public PaymentMode getPaymentMode() { return paymentMode; }
-    public String getPaymentReference() { return paymentReference; }
-    public BookingStatus getBookingStatus() { return bookingStatus; }
 
     public void confirm() {
         this.bookingStatus = BookingStatus.CONFIRMED;

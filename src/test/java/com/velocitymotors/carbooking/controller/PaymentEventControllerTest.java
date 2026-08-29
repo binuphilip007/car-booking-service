@@ -1,19 +1,22 @@
 package com.velocitymotors.carbooking.controller;
 
 import com.velocitymotors.carbooking.CarBookingApplication;
+import com.velocitymotors.carbooking.model.payment.PublishedEventMetadata;
 import com.velocitymotors.carbooking.service.adapter.outbound.kafka.BankTransferPaymentEventPublisher;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.Instant;
+
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -26,11 +29,14 @@ class PaymentEventControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private BankTransferPaymentEventPublisher eventPublisher;
 
     @Test
     void publishesBankTransferPaymentEvent() throws Exception {
+        when(eventPublisher.publish(any())).thenReturn(new PublishedEventMetadata(
+                "bank-transfer-payment-events", 2, 42L, "PAY-10001", Instant.parse("2026-08-28T10:15:30Z")));
+
         mockMvc.perform(post("/api/v1/payment-events/bank-transfer")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -42,7 +48,10 @@ class PaymentEventControllerTest {
                                 }
                                 """))
                 .andExpect(status().isAccepted())
-            .andExpect(jsonPath("$.paymentId").value("PAY-10001"));
+                .andExpect(jsonPath("$.event.paymentId").value("PAY-10001"))
+                .andExpect(jsonPath("$.metadata.topic").value("bank-transfer-payment-events"))
+                .andExpect(jsonPath("$.metadata.partition").value(2))
+                .andExpect(jsonPath("$.metadata.offset").value(42));
 
         verify(eventPublisher).publish(any());
     }

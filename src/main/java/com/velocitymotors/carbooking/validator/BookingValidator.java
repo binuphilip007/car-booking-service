@@ -1,25 +1,23 @@
 package com.velocitymotors.carbooking.validator;
 
 import com.velocitymotors.carbooking.model.request.BookingRequest;
-import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
-@Component
-public class BookingValidator {
+public final class BookingValidator {
 
     private static final long MAX_RENTAL_DAYS = 21;
+    private static final Set<String> VALID_VEHICLE_IDS =
+            Set.of("VH1001", "VH1002", "VH1003");
 
-    private final VehicleValidator vehicleValidator;
-
-    public BookingValidator(VehicleValidator vehicleValidator) {
-        this.vehicleValidator = vehicleValidator;
+    private BookingValidator() {
     }
 
-    public void validate(BookingRequest request) {
+    public static void validate(BookingRequest request) {
         if (!request.rentalStartDate().isAfter(LocalDateTime.now())) {
             throw new ResponseStatusException(BAD_REQUEST,
                     "rentalStartDate must be in the future");
@@ -37,6 +35,8 @@ public class BookingValidator {
                     "A vehicle cannot be booked for more than 21 days");
         }
 
-        vehicleValidator.validate(request.vehicleId());
+        if (!VALID_VEHICLE_IDS.contains(request.vehicleId().trim())) {
+            throw new ResponseStatusException(BAD_REQUEST, "Invalid vehicleId");
+        }
     }
 }

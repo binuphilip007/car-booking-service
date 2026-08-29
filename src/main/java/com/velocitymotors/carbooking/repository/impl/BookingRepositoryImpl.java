@@ -11,16 +11,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 import com.velocitymotors.carbooking.model.entity.BookingStatus;
 import com.velocitymotors.carbooking.model.entity.PaymentMode;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 
 @Repository
+@RequiredArgsConstructor
 public class BookingRepositoryImpl implements BookingRepository {
 
     private final BookingJpaRepository bookingJpaRepository;
-
-    public BookingRepositoryImpl(BookingJpaRepository bookingJpaRepository) {
-        this.bookingJpaRepository = bookingJpaRepository;
-    }
 
     @Override
     public Booking save(Booking booking) {
@@ -35,6 +33,11 @@ public class BookingRepositoryImpl implements BookingRepository {
     @Override
     public Optional<Booking> findByPaymentReference(String paymentId) {
         return bookingJpaRepository.findByPaymentReference(paymentId);
+    }
+
+    @Override
+    public boolean existsByPaymentReference(String paymentReference) {
+        return bookingJpaRepository.existsByPaymentReference(paymentReference);
     }
 
     @Override

@@ -14,6 +14,8 @@ public interface BookingJpaRepository extends JpaRepository<Booking, String> {
 
 	Optional<Booking> findByPaymentReference(String paymentReference);
 
+	boolean existsByPaymentReference(String paymentReference);
+
 	List<Booking> findByPaymentModeAndBookingStatusAndRentalStartDateLessThanEqual(
 			PaymentMode paymentMode,
 			BookingStatus bookingStatus,

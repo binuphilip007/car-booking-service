@@ -5,8 +5,7 @@ import com.velocitymotors.carbooking.model.entity.BookingStatus;
 import com.velocitymotors.carbooking.model.entity.PaymentMode;
 import com.velocitymotors.carbooking.repository.BookingRepository;
 import com.velocitymotors.carbooking.service.BankTransferBookingCancellationService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,11 +15,9 @@ import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;
 
 @Service
+@Slf4j
 public class BankTransferBookingCancellationServiceImpl
         implements BankTransferBookingCancellationService {
-
-    private static final Logger logger = LoggerFactory.getLogger(
-            BankTransferBookingCancellationServiceImpl.class);
 
     private final BookingRepository bookingRepository;
         private final long cancellationMinutes;
@@ -41,6 +38,8 @@ public class BankTransferBookingCancellationServiceImpl
         LocalDateTime cutoffDate = LocalDateTime.now().plusMinutes(cancellationMinutes);
         int cancelledCount = 0;
         Pageable firstBatch = PageRequest.of(0, cancellationBatchSize);
+        log.debug("Scanning for expired bank-transfer bookings cutoffDate={} batchSize={}",
+                cutoffDate, cancellationBatchSize);
 
         while (true) {
             var bookings = bookingRepository
@@ -57,11 +56,12 @@ public class BankTransferBookingCancellationServiceImpl
                 booking.cancel();
                 bookingRepository.save(booking);
                 cancelledCount++;
-                logger.info("Cancelled unpaid bank-transfer bookingId={} rentalStartDate={} cutoffDate={}",
+                log.debug("Cancelled unpaid bank-transfer bookingId={} rentalStartDate={} cutoffDate={}",
                         booking.getBookingId(), booking.getRentalStartDate(), cutoffDate);
             }
         }
 
+            log.debug("Completed expired bank-transfer booking scan cancelledCount={}", cancelledCount);
         return cancelledCount;
     }
 }

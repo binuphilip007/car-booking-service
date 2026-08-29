@@ -74,6 +74,20 @@ class BankTransferPaymentEventListenerTest {
     }
 
     @Test
+    void rejectsEventWhoseTransactionDetailsReferenceAnotherBooking() {
+        Booking booking = booking(BookingStatus.PENDING_PAYMENT, PaymentMode.BANK_TRANSFER);
+        when(bookingRepository.findByPaymentReference("PAY-10001")).thenReturn(Optional.of(booking));
+        BankTransferPaymentEventRequest event = new BankTransferPaymentEventRequest(
+                "PAY-10001", "ACC-123", BigDecimal.valueOf(500), "TXN123456789 BKG9999999");
+
+        assertThrows(InvalidBankTransferPaymentEventException.class,
+                () -> listener().handlePaymentEvent(event));
+
+        assertEquals(BookingStatus.PENDING_PAYMENT, booking.getBookingStatus());
+        verify(bookingRepository, never()).save(booking);
+    }
+
+    @Test
     void rejectsNonPositiveAmount() {
         BankTransferPaymentEventRequest invalidEvent = new BankTransferPaymentEventRequest(
                 "PAY-10001", "ACC-123", BigDecimal.ZERO, "TXN123456789 BKG0012345");
@@ -104,7 +118,7 @@ class BankTransferPaymentEventListenerTest {
     }
 
     private Booking booking(BookingStatus status, PaymentMode paymentMode) {
-        return new Booking("BKG00000001", "Binu Philip", "VH1001",
+        return new Booking("BKG0012345", "Binu Philip", "VH1001",
                 LocalDateTime.parse("2026-09-01T10:00:00"), LocalDateTime.parse("2026-09-05T10:00:00"),
                 VehicleCategory.SUV, paymentMode, "PAY-10001", status);
     }

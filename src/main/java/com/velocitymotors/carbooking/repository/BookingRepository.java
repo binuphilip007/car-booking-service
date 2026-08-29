@@ -17,6 +17,8 @@ public interface BookingRepository {
 
     Optional<Booking> findByPaymentReference(String paymentId);
 
+    boolean existsByPaymentReference(String paymentReference);
+
         List<Booking> findByPaymentModeAndBookingStatusAndRentalStartDateLessThanEqual(
             PaymentMode paymentMode,
             BookingStatus bookingStatus,
