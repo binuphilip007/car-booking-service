@@ -4,6 +4,7 @@ import com.velocitymotors.carbooking.model.entity.BookingStatus;
 import com.velocitymotors.carbooking.model.entity.PaymentMode;
 import com.velocitymotors.carbooking.model.entity.VehicleCategory;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public record BookingDetailsResponse(
@@ -15,5 +16,7 @@ public record BookingDetailsResponse(
         PaymentMode paymentMode,
         String paymentReference,
         String bookingId,
-        BookingStatus bookingStatus) {
+        BookingStatus bookingStatus,
+        BigDecimal totalAmount,
+        BigDecimal amountPaid) {
 }

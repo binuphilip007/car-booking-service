@@ -2,12 +2,13 @@ package com.velocitymotors.carbooking.repository;
 
 import com.velocitymotors.carbooking.model.entity.Booking;
 
-import java.util.List;
 import java.util.Optional;
 import java.time.LocalDateTime;
 import com.velocitymotors.carbooking.model.entity.BookingStatus;
 import com.velocitymotors.carbooking.model.entity.PaymentMode;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import java.util.List;
 
 public interface BookingRepository {
 
@@ -17,15 +18,13 @@ public interface BookingRepository {
 
     Optional<Booking> findByPaymentReference(String paymentId);
 
-    boolean existsByPaymentReference(String paymentReference);
-
         List<Booking> findByPaymentModeAndBookingStatusAndRentalStartDateLessThanEqual(
             PaymentMode paymentMode,
             BookingStatus bookingStatus,
             LocalDateTime rentalStartDate,
             Pageable pageable);
 
-    List<Booking> findAll();
+    Page<Booking> findAll(Pageable pageable);
 
     void deleteAll();
 }

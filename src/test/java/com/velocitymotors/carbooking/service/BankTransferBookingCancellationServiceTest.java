@@ -97,6 +97,7 @@ class BankTransferBookingCancellationServiceTest {
                 VehicleCategory.SUV,
                 paymentMode,
                 "PAY-10001",
-                status);
+                status,
+                BigDecimal.valueOf(500));
     }
 }

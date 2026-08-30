@@ -3,9 +3,9 @@ package com.velocitymotors.carbooking.repository.impl;
 import com.velocitymotors.carbooking.model.entity.Booking;
 import com.velocitymotors.carbooking.repository.BookingJpaRepository;
 import com.velocitymotors.carbooking.repository.BookingRepository;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,11 +36,6 @@ public class BookingRepositoryImpl implements BookingRepository {
     }
 
     @Override
-    public boolean existsByPaymentReference(String paymentReference) {
-        return bookingJpaRepository.existsByPaymentReference(paymentReference);
-    }
-
-    @Override
     public List<Booking> findByPaymentModeAndBookingStatusAndRentalStartDateLessThanEqual(
             PaymentMode paymentMode,
             BookingStatus bookingStatus,
@@ -51,8 +46,8 @@ public class BookingRepositoryImpl implements BookingRepository {
     }
 
     @Override
-    public List<Booking> findAll() {
-        return bookingJpaRepository.findAll();
+    public Page<Booking> findAll(Pageable pageable) {
+        return bookingJpaRepository.findAll(pageable);
     }
 
     @Override

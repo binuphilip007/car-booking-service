@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Service
@@ -53,11 +54,14 @@ public class BankTransferBookingCancellationServiceImpl
             }
 
             for (Booking booking : bookings) {
+                BigDecimal shortfall = booking.outstandingAmount();
                 booking.cancel();
                 bookingRepository.save(booking);
                 cancelledCount++;
-                log.debug("Cancelled unpaid bank-transfer bookingId={} rentalStartDate={} cutoffDate={}",
-                        booking.getBookingId(), booking.getRentalStartDate(), cutoffDate);
+                log.warn("Cancelled bank-transfer bookingId={} rentalStartDate={} cutoffDate={} "
+                                + "totalAmount={} amountPaid={} shortfall={}",
+                        booking.getBookingId(), booking.getRentalStartDate(), cutoffDate,
+                        booking.getTotalAmount(), booking.getAmountPaid(), shortfall);
             }
         }
 

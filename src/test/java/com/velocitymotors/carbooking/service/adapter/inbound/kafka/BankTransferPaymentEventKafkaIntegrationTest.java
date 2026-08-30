@@ -71,7 +71,8 @@ class BankTransferPaymentEventKafkaIntegrationTest {
                 VehicleCategory.SUV,
                 PaymentMode.BANK_TRANSFER,
                 PAYMENT_ID,
-                BookingStatus.PENDING_PAYMENT));
+                BookingStatus.PENDING_PAYMENT,
+                BigDecimal.valueOf(500)));
     }
 
     @Test

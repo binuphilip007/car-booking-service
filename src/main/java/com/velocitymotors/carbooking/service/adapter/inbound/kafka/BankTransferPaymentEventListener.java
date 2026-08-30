@@ -5,6 +5,7 @@ import com.velocitymotors.carbooking.model.entity.BookingStatus;
 import com.velocitymotors.carbooking.model.entity.PaymentMode;
 import com.velocitymotors.carbooking.model.payment.BankTransferPaymentEventRequest;
 import com.velocitymotors.carbooking.repository.BookingRepository;
+import com.velocitymotors.carbooking.repository.ProcessedPaymentEventRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -20,6 +21,7 @@ public class BankTransferPaymentEventListener {
 
     private static final String TRANSACTION_DETAILS_PATTERN = "^\\S{12}\\s+\\S{10}$";
     private final BookingRepository bookingRepository;
+    private final ProcessedPaymentEventRepository processedPaymentEventRepository;
 
     @KafkaListener(
             topics = "${bank-transfer.payment-events-topic}",
@@ -55,10 +57,29 @@ public class BankTransferPaymentEventListener {
                         if (booking.getBookingStatus() != BookingStatus.PENDING_PAYMENT) {
                             throw mismatch(event.paymentId(), "booking is not pending payment");
                         }
-                        booking.confirm();
+                        String transactionReference = transactionReferenceFrom(event.transactionDetails());
+                        if (processedPaymentEventRepository.isAlreadyProcessed(transactionReference)) {
+                            log.debug("Ignoring replayed bank-transfer payment event transactionReference={} "
+                                            + "for bookingId={}",
+                                    transactionReference, booking.getBookingId());
+                            return;
+                        }
+                        processedPaymentEventRepository.markProcessed(transactionReference, booking.getBookingId());
+
+                        boolean confirmed = booking.registerPayment(event.paymentAmount());
                         bookingRepository.save(booking);
-                        log.debug("Confirmed bank-transfer bookingId={} using paymentId={}; status now {}",
-                                booking.getBookingId(), event.paymentId(), booking.getBookingStatus());
+                        if (confirmed) {
+                            log.debug("Confirmed bank-transfer bookingId={} using paymentId={}; "
+                                            + "totalAmount={} amountPaid={}",
+                                    booking.getBookingId(), event.paymentId(),
+                                    booking.getTotalAmount(), booking.getAmountPaid());
+                        } else {
+                            log.info("Recorded partial bank-transfer payment for bookingId={} paymentId={}; "
+                                            + "totalAmount={} amountPaid={} outstanding={}; booking stays {}",
+                                    booking.getBookingId(), event.paymentId(),
+                                    booking.getTotalAmount(), booking.getAmountPaid(),
+                                    booking.outstandingAmount(), booking.getBookingStatus());
+                        }
                     }, () -> {
                         log.warn("No pending bank-transfer booking matched paymentId={}",
                                 event.paymentId());
@@ -80,6 +101,10 @@ public class BankTransferPaymentEventListener {
 
     private String bookingIdFrom(String transactionDetails) {
         return transactionDetails.trim().split("\\s+")[1];
+    }
+
+    private String transactionReferenceFrom(String transactionDetails) {
+        return transactionDetails.trim().split("\\s+")[0];
     }
 
     private void validatePaymentEvent(BankTransferPaymentEventRequest event) {

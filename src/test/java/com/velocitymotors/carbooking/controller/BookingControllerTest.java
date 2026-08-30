@@ -12,7 +12,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -80,17 +82,27 @@ class BookingControllerTest {
 
             mockMvc.perform(get("/api/v1/bookings"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(1)))
-                .andExpect(jsonPath("$[0].customerName").value("Binu Philip"))
-                .andExpect(jsonPath("$[0].vehicleId").value("VH1001"))
-                .andExpect(jsonPath("$[0].rentalStartDate").value("2026-09-01T10:00:00"))
-                .andExpect(jsonPath("$[0].rentalEndDate").value("2026-09-05T10:00:00"))
-                .andExpect(jsonPath("$[0].vehicleCategory").value("SUV"))
-                .andExpect(jsonPath("$[0].paymentMode").value("DIGITAL_WALLET"))
-                .andExpect(jsonPath("$[0].paymentReference").value("WALLET123"))
-                .andExpect(jsonPath("$[0].bookingId").isString())
-                .andExpect(jsonPath("$[0].bookingStatus").value("CONFIRMED"));
+                .andExpect(jsonPath("$.content", org.hamcrest.Matchers.hasSize(1)))
+                .andExpect(jsonPath("$.size").value(20))
+                .andExpect(jsonPath("$.content[0].customerName").value("Binu Philip"))
+                .andExpect(jsonPath("$.content[0].vehicleId").value("VH1001"))
+                .andExpect(jsonPath("$.content[0].rentalStartDate").value("2026-09-01T10:00:00"))
+                .andExpect(jsonPath("$.content[0].rentalEndDate").value("2026-09-05T10:00:00"))
+                .andExpect(jsonPath("$.content[0].vehicleCategory").value("SUV"))
+                .andExpect(jsonPath("$.content[0].paymentMode").value("DIGITAL_WALLET"))
+                .andExpect(jsonPath("$.content[0].paymentReference").value("WALLET123"))
+                .andExpect(jsonPath("$.content[0].bookingId").isString())
+                .andExpect(jsonPath("$.content[0].bookingStatus").value("CONFIRMED"))
+                .andExpect(jsonPath("$.content[0].totalAmount").value(500.00))
+                .andExpect(jsonPath("$.content[0].amountPaid").value(500.00));
             }
+
+        @Test
+        void capsRequestedBookingPageSize() throws Exception {
+        mockMvc.perform(get("/api/v1/bookings").param("size", "500"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.size").value(100));
+        }
 
     @Test
     void rejectsRentalLongerThan21Days() throws Exception {
@@ -124,6 +136,16 @@ class BookingControllerTest {
     }
 
     @Test
+    void rejectsNonPositiveTotalAmount() throws Exception {
+        String request = validRequest("DIGITAL_WALLET").replace("500.00", "0.00");
+
+        mockMvc.perform(post("/api/v1/bookings")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void rejectsMalformedBookingRequest() throws Exception {
         mockMvc.perform(post("/api/v1/bookings")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -135,7 +157,10 @@ class BookingControllerTest {
     @Test
         void createsConfirmedCreditCardBookingWhenPaymentIsApproved() throws Exception {
         when(creditCardPaymentClient.retrievePaymentStatus("CC123456789"))
-            .thenReturn(CreditCardPaymentClient.PaymentStatus.APPROVED);
+            .thenAnswer(invocation -> {
+                assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
+                return CreditCardPaymentClient.PaymentStatus.APPROVED;
+            });
 
         mockMvc.perform(post("/api/v1/bookings")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -184,6 +209,7 @@ class BookingControllerTest {
                   "rentalStartDate": "%sT10:00:00",
                   "rentalEndDate": "%sT10:00:00",
                   "vehicleCategory": "SUV",
+                  "totalAmount": 500.00,
                   "paymentMode": "DIGITAL_WALLET",
                   "paymentReference": "WALLET123"
                 }

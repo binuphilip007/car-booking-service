@@ -87,6 +87,7 @@ class BookingCreditCardWireMockIntegrationTest {
                   "rentalStartDate": "2026-09-01T10:00:00",
                   "rentalEndDate": "2026-09-05T10:00:00",
                   "vehicleCategory": "SUV",
+                  "totalAmount": 500.00,
                   "paymentMode": "CREDIT_CARD",
                   "paymentReference": "%s"
                 }

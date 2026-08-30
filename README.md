@@ -39,6 +39,7 @@ Content-Type: application/json
   "rentalStartDate": "2026-09-01T10:00:00",
   "rentalEndDate": "2026-09-05T10:00:00",
   "vehicleCategory": "SUV",
+  "totalAmount": 500.00,
   "paymentMode": "DIGITAL_WALLET",
   "paymentReference": "WALLET123"
 }
@@ -70,7 +71,9 @@ GET http://localhost:8080/api/v1/bookings
     "vehicleCategory": "SUV",
     "paymentMode": "BANK_TRANSFER",
     "paymentReference": "PAY-10001",
-    "bookingStatus": "PENDING_PAYMENT"
+    "bookingStatus": "PENDING_PAYMENT",
+    "totalAmount": 500.00,
+    "amountPaid": 200.00
   }
 ]
 ```
