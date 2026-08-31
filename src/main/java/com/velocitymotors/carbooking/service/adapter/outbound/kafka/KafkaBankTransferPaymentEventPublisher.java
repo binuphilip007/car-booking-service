@@ -1,7 +1,7 @@
 package com.velocitymotors.carbooking.service.adapter.outbound.kafka;
 
-import com.velocitymotors.carbooking.model.payment.BankTransferPaymentEventRequest;
-import com.velocitymotors.carbooking.model.payment.PublishedEventMetadata;
+import com.velocitymotors.carbooking.model.event.BankTransferPaymentEventRequest;
+import com.velocitymotors.carbooking.model.event.PublishedEventMetadata;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.beans.factory.annotation.Value;

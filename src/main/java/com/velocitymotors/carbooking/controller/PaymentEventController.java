@@ -1,8 +1,8 @@
 package com.velocitymotors.carbooking.controller;
 
-import com.velocitymotors.carbooking.model.payment.BankTransferPaymentEventRequest;
-import com.velocitymotors.carbooking.model.payment.BankTransferPaymentEventResponse;
-import com.velocitymotors.carbooking.model.payment.PublishedEventMetadata;
+import com.velocitymotors.carbooking.model.event.BankTransferPaymentEventRequest;
+import com.velocitymotors.carbooking.model.event.BankTransferPaymentEventResponse;
+import com.velocitymotors.carbooking.model.event.PublishedEventMetadata;
 import com.velocitymotors.carbooking.service.adapter.outbound.kafka.BankTransferPaymentEventPublisher;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

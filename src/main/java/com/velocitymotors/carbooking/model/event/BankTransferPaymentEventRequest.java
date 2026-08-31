@@ -1,4 +1,4 @@
-package com.velocitymotors.carbooking.model.payment;
+package com.velocitymotors.carbooking.model.event;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

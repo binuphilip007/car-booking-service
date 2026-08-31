@@ -1,4 +1,4 @@
-package com.velocitymotors.carbooking.model.request;
+package com.velocitymotors.carbooking.model.api.request;
 
 import com.velocitymotors.carbooking.model.entity.PaymentMode;
 import com.velocitymotors.carbooking.model.entity.VehicleCategory;

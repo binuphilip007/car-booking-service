@@ -3,7 +3,7 @@ package com.velocitymotors.carbooking.service.adapter.inbound.kafka;
 import com.velocitymotors.carbooking.model.entity.Booking;
 import com.velocitymotors.carbooking.model.entity.BookingStatus;
 import com.velocitymotors.carbooking.model.entity.PaymentMode;
-import com.velocitymotors.carbooking.model.payment.BankTransferPaymentEventRequest;
+import com.velocitymotors.carbooking.model.event.BankTransferPaymentEventRequest;
 import com.velocitymotors.carbooking.repository.BookingRepository;
 import com.velocitymotors.carbooking.repository.ProcessedPaymentEventRepository;
 import lombok.RequiredArgsConstructor;

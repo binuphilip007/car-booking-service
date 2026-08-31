@@ -1,7 +1,7 @@
 package com.velocitymotors.carbooking.controller;
 
 import com.velocitymotors.carbooking.CarBookingApplication;
-import com.velocitymotors.carbooking.model.payment.PublishedEventMetadata;
+import com.velocitymotors.carbooking.model.event.PublishedEventMetadata;
 import com.velocitymotors.carbooking.service.adapter.outbound.kafka.BankTransferPaymentEventPublisher;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

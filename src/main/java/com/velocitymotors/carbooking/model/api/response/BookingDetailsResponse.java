@@ -1,4 +1,4 @@
-package com.velocitymotors.carbooking.model.response;
+package com.velocitymotors.carbooking.model.api.response;
 
 import com.velocitymotors.carbooking.model.entity.BookingStatus;
 import com.velocitymotors.carbooking.model.entity.PaymentMode;

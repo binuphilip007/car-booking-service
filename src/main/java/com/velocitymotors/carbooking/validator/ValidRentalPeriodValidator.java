@@ -1,6 +1,6 @@
 package com.velocitymotors.carbooking.validator;
 
-import com.velocitymotors.carbooking.model.request.BookingRequest;
+import com.velocitymotors.carbooking.model.api.request.BookingRequest;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 

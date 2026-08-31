@@ -1,8 +1,8 @@
 package com.velocitymotors.carbooking.controller;
 
-import com.velocitymotors.carbooking.model.request.BookingRequest;
-import com.velocitymotors.carbooking.model.response.BookingResponse;
-import com.velocitymotors.carbooking.model.response.BookingDetailsResponse;
+import com.velocitymotors.carbooking.model.api.request.BookingRequest;
+import com.velocitymotors.carbooking.model.api.response.BookingResponse;
+import com.velocitymotors.carbooking.model.api.response.BookingDetailsResponse;
 import com.velocitymotors.carbooking.service.BookingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

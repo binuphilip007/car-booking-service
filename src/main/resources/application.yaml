@@ -27,10 +27,10 @@ spring:
                 class: org.springframework.kafka.support.serializer.JacksonJsonDeserializer
           json:
             trusted:
-              packages: com.velocitymotors.carbooking.model.payment
+              packages: com.velocitymotors.carbooking.model.event
             value:
               default:
-                type: com.velocitymotors.carbooking.model.payment.BankTransferPaymentEventRequest
+                type: com.velocitymotors.carbooking.model.event.BankTransferPaymentEventRequest
 credit-card-validation:
   base-url: http://localhost:9090/host/credit-card-payment-api
   connect-timeout: 5s

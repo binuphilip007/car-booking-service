@@ -1,6 +1,6 @@
 package com.velocitymotors.carbooking.validator;
 
-import com.velocitymotors.carbooking.model.request.BookingRequest;
+import com.velocitymotors.carbooking.model.api.request.BookingRequest;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Set;
