@@ -34,10 +34,11 @@ public class BookingServiceImpl implements BookingService {
     private final BookingIdSequenceJpaRepository bookingIdSequenceJpaRepository;
     private final CreditCardPaymentClient creditCardPaymentClient;
     private final TransactionTemplate transactionTemplate;
+    private final BookingValidator bookingValidator;
 
     @Override
     public BookingResponse createBooking(BookingRequest request) {
-        BookingValidator.validate(request);
+        bookingValidator.validate(request);
 
         String paymentReference = request.paymentReference().trim();
 

@@ -1,22 +1,21 @@
 package com.velocitymotors.carbooking.validator;
 
 import com.velocitymotors.carbooking.model.api.request.BookingRequest;
+import com.velocitymotors.carbooking.repository.VehicleRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.util.Set;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
-public final class BookingValidator {
+@Component
+@RequiredArgsConstructor
+public class BookingValidator {
 
-    private static final Set<String> VALID_VEHICLE_IDS =
-            Set.of("VH1001", "VH1002", "VH1003");
+    private final VehicleRepository vehicleRepository;
 
-    private BookingValidator() {
-    }
-
-    public static void validate(BookingRequest request) {
-        if (!VALID_VEHICLE_IDS.contains(request.vehicleId().trim())) {
+    public void validate(BookingRequest request) {
+        if (!vehicleRepository.existsByVehicleId(request.vehicleId().trim())) {
             throw new ResponseStatusException(BAD_REQUEST, "Invalid vehicleId");
         }
     }
