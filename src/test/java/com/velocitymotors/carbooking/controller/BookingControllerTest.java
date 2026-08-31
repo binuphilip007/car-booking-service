@@ -155,6 +155,16 @@ class BookingControllerTest {
     }
 
     @Test
+    void rejectsUnsupportedPaymentModeWithSupportedValues() throws Exception {
+        mockMvc.perform(post("/api/v1/bookings")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(validRequest("UPI")))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error")
+                        .value("paymentMode must be one of: CASH, CREDIT_CARD, BANK_TRANSFER, DIGITAL_WALLET"));
+    }
+
+    @Test
         void createsConfirmedCreditCardBookingWhenPaymentIsApproved() throws Exception {
         when(creditCardPaymentClient.retrievePaymentStatus("CC123456789"))
             .thenAnswer(invocation -> {

@@ -1,0 +1,223 @@
+@carBookingBaseUrl = http://localhost:8080
+
+### List all bookings
+# @name listBookings
+GET {{carBookingBaseUrl}}/api/v1/bookings?page=0&size=10&sort=bookingId,desc
+
+### Create booking - digital wallet - confirmed
+# @name createDigitalWalletBooking
+POST {{carBookingBaseUrl}}/api/v1/bookings
+Content-Type: application/json
+
+{
+  "customerName": "Binu Philip",
+  "vehicleId": "VH1001",
+  "rentalStartDate": "2026-09-01T10:00:00",
+  "rentalEndDate": "2026-09-05T18:00:00",
+  "vehicleCategory": "SUV",
+  "totalAmount": 500.00,
+  "paymentMode": "DIGITAL_WALLET",
+  "paymentReference": "WALLET001"
+}
+
+### Create booking - cash - confirmed
+# @name createCashBooking
+POST {{carBookingBaseUrl}}/api/v1/bookings
+Content-Type: application/json
+
+{
+  "customerName": "John Smith",
+  "vehicleId": "VH1002",
+  "rentalStartDate": "2026-09-10T10:00:00",
+  "rentalEndDate": "2026-09-12T18:00:00",
+  "vehicleCategory": "SEDAN",
+  "totalAmount": 250.00,
+  "paymentMode": "CASH",
+  "paymentReference": "CASH001"
+}
+
+### Create booking - credit card - approved
+# @name createApprovedCreditCardBooking
+POST {{carBookingBaseUrl}}/api/v1/bookings
+Content-Type: application/json
+
+{
+  "customerName": "Binu Philip",
+  "vehicleId": "VH1001",
+  "rentalStartDate": "2026-09-01T10:00:00",
+  "rentalEndDate": "2026-09-05T18:00:00",
+  "vehicleCategory": "SUV",
+  "totalAmount": 500.00,
+  "paymentMode": "CREDIT_CARD",
+  "paymentReference": "CC123456789"
+}
+
+### Create booking - credit card - rejected payment
+# @name createRejectedCreditCardBooking
+POST {{carBookingBaseUrl}}/api/v1/bookings
+Content-Type: application/json
+
+{
+  "customerName": "Binu Philip",
+  "vehicleId": "VH1001",
+  "rentalStartDate": "2026-09-01T10:00:00",
+  "rentalEndDate": "2026-09-05T18:00:00",
+  "vehicleCategory": "SUV",
+  "totalAmount": 500.00,
+  "paymentMode": "CREDIT_CARD",
+  "paymentReference": "CC987654321"
+}
+
+### Create booking - credit card - payment validation unavailable
+# @name createUnavailableCreditCardBooking
+POST {{carBookingBaseUrl}}/api/v1/bookings
+Content-Type: application/json
+
+{
+  "customerName": "Binu Philip",
+  "vehicleId": "VH1001",
+  "rentalStartDate": "2026-09-01T10:00:00",
+  "rentalEndDate": "2026-09-05T18:00:00",
+  "vehicleCategory": "SUV",
+  "totalAmount": 500.00,
+  "paymentMode": "CREDIT_CARD",
+  "paymentReference": "CC000000000"
+}
+
+### Create booking - bank transfer - pending payment
+# @name createPendingBankTransferBooking
+POST {{carBookingBaseUrl}}/api/v1/bookings
+Content-Type: application/json
+
+{
+  "customerName": "Binu Philip",
+  "vehicleId": "VH1001",
+  "rentalStartDate": "2026-09-04T10:00:00",
+  "rentalEndDate": "2026-09-05T18:00:00",
+  "vehicleCategory": "SUV",
+  "totalAmount": 500.00,
+  "paymentMode": "BANK_TRANSFER",
+  "paymentReference": "BANK001"
+}
+
+### Create booking - bank transfer - pending payment with 48 hr
+# @name createPendingBankTransfer48HourBooking
+POST {{carBookingBaseUrl}}/api/v1/bookings
+Content-Type: application/json
+
+{
+  "customerName": "Binu Philip",
+  "vehicleId": "VH1001",
+  "rentalStartDate": "2026-09-01T10:00:00",
+  "rentalEndDate": "2026-09-05T18:00:00",
+  "vehicleCategory": "SUV",
+  "totalAmount": 500.00,
+  "paymentMode": "BANK_TRANSFER",
+  "paymentReference": "BANK002"
+}
+
+### Create booking - rental exceeds 21 days - validation error
+# @name createOverlongRentalBooking
+POST {{carBookingBaseUrl}}/api/v1/bookings
+Content-Type: application/json
+
+{
+  "customerName": "Binu Philip",
+  "vehicleId": "VH1001",
+  "rentalStartDate": "2026-09-01T10:00:00",
+  "rentalEndDate": "2026-09-23T10:00:00",
+  "vehicleCategory": "SUV",
+  "totalAmount": 2200.00,
+  "paymentMode": "DIGITAL_WALLET",
+  "paymentReference": "WALLET002"
+}
+
+### Create booking - invalid vehicle ID - validation error
+# @name createInvalidVehicleBooking
+POST {{carBookingBaseUrl}}/api/v1/bookings
+Content-Type: application/json
+
+{
+  "customerName": "Binu Philip",
+  "vehicleId": "VH9999",
+  "rentalStartDate": "2026-09-01T10:00:00",
+  "rentalEndDate": "2026-09-05T18:00:00",
+  "vehicleCategory": "SUV",
+  "totalAmount": 500.00,
+  "paymentMode": "DIGITAL_WALLET",
+  "paymentReference": "WALLET003"
+}
+
+### Create booking - unsupported payment mode - validation error
+# @name createUnsupportedPaymentModeBooking
+POST {{carBookingBaseUrl}}/api/v1/bookings
+Content-Type: application/json
+
+{
+  "customerName": "Binu Philip",
+  "vehicleId": "VH1001",
+  "rentalStartDate": "2026-09-01T10:00:00",
+  "rentalEndDate": "2026-09-05T18:00:00",
+  "vehicleCategory": "SUV",
+  "totalAmount": 500.00,
+  "paymentMode": "UPI",
+  "paymentReference": "UPI001"
+}
+
+### Create booking - missing payment mode - validation error
+# @name createMissingPaymentModeBooking
+POST {{carBookingBaseUrl}}/api/v1/bookings
+Content-Type: application/json
+
+{
+  "customerName": "Binu Philip",
+  "vehicleId": "VH1001",
+  "rentalStartDate": "2026-09-01T10:00:00",
+  "rentalEndDate": "2026-09-05T18:00:00",
+  "vehicleCategory": "SUV",
+  "totalAmount": 500.00,
+  "paymentReference": "PAY001"
+}
+
+### Create booking - missing payment reference - validation error
+# @name createMissingPaymentReferenceBooking
+POST {{carBookingBaseUrl}}/api/v1/bookings
+Content-Type: application/json
+
+{
+  "customerName": "Binu Philip",
+  "vehicleId": "VH1001",
+  "rentalStartDate": "2026-09-01T10:00:00",
+  "rentalEndDate": "2026-09-05T18:00:00",
+  "vehicleCategory": "SUV",
+  "totalAmount": 500.00,
+  "paymentMode": "BANK_TRANSFER"
+}
+
+### Create booking - missing total amount - validation error
+# @name createMissingTotalAmountBooking
+POST {{carBookingBaseUrl}}/api/v1/bookings
+Content-Type: application/json
+
+{
+  "customerName": "Binu Philip",
+  "vehicleId": "VH1001",
+  "rentalStartDate": "2026-09-01T10:00:00",
+  "rentalEndDate": "2026-09-05T18:00:00",
+  "vehicleCategory": "SUV",
+  "paymentMode": "BANK_TRANSFER",
+  "paymentReference": "BANK003"
+}
+
+
+###  publish valid bank transfer event
+# @name publishValidBankTransferEvent
+POST {{carBookingBaseUrl}}/api/v1/payment-events/bank-transfer
+Content-Type: application/json
+
+{
+  "paymentId": "BANK001",
+  "senderAccountNumber": "ACC-1234567890",
+  "paymentAmount": 300.00,
+  "transactionDetails": "TXN000000001 BKG0000004"
+}
