@@ -15,6 +15,8 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDate;
+
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
@@ -31,6 +33,8 @@ class BookingCreditCardWireMockIntegrationTest {
 
     private static final String PAYMENT_REFERENCE = "CC123456789";
     private static final String PAYMENT_STATUS_PATH = "/host/credit-card-payment-api/payment-status";
+    private static final LocalDate RENTAL_START_DATE = LocalDate.now().plusDays(1);
+    private static final LocalDate RENTAL_END_DATE = RENTAL_START_DATE.plusDays(4);
     private static final WireMockServer wireMockServer = new WireMockServer(0);
 
     static {
@@ -84,13 +88,13 @@ class BookingCreditCardWireMockIntegrationTest {
                 {
                   "customerName": "Binu Philip",
                   "vehicleId": "VH1001",
-                  "rentalStartDate": "2026-09-01T10:00:00",
-                  "rentalEndDate": "2026-09-05T10:00:00",
+                  "rentalStartDate": "%sT10:00:00",
+                  "rentalEndDate": "%sT10:00:00",
                   "vehicleCategory": "SUV",
                   "totalAmount": 500.00,
                   "paymentMode": "CREDIT_CARD",
                   "paymentReference": "%s"
                 }
-                """.formatted(PAYMENT_REFERENCE);
+                """.formatted(RENTAL_START_DATE, RENTAL_END_DATE, PAYMENT_REFERENCE);
     }
 }

@@ -14,6 +14,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.time.LocalDate;
+
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -25,6 +27,9 @@ import static org.mockito.Mockito.when;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class BookingControllerTest {
+
+    private static final LocalDate RENTAL_START_DATE = LocalDate.now().plusDays(1);
+    private static final LocalDate RENTAL_END_DATE = RENTAL_START_DATE.plusDays(4);
 
     @Autowired
     private MockMvc mockMvc;
@@ -86,8 +91,8 @@ class BookingControllerTest {
                 .andExpect(jsonPath("$.size").value(20))
                 .andExpect(jsonPath("$.content[0].customerName").value("Binu Philip"))
                 .andExpect(jsonPath("$.content[0].vehicleId").value("VH1001"))
-                .andExpect(jsonPath("$.content[0].rentalStartDate").value("2026-09-01T10:00:00"))
-                .andExpect(jsonPath("$.content[0].rentalEndDate").value("2026-09-05T10:00:00"))
+                .andExpect(jsonPath("$.content[0].rentalStartDate").value(RENTAL_START_DATE + "T10:00:00"))
+                .andExpect(jsonPath("$.content[0].rentalEndDate").value(RENTAL_END_DATE + "T10:00:00"))
                 .andExpect(jsonPath("$.content[0].vehicleCategory").value("SUV"))
                 .andExpect(jsonPath("$.content[0].paymentMode").value("DIGITAL_WALLET"))
                 .andExpect(jsonPath("$.content[0].paymentReference").value("WALLET123"))
@@ -108,7 +113,8 @@ class BookingControllerTest {
     void rejectsRentalLongerThan21Days() throws Exception {
         mockMvc.perform(post("/api/v1/bookings")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(validRequestWithDates("2026-09-01", "2026-09-23")))
+                        .content(validRequestWithDates(
+                                RENTAL_START_DATE.toString(), RENTAL_START_DATE.plusDays(22).toString())))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error")
                         .value("A vehicle cannot be booked for more than 21 days"));
@@ -118,7 +124,8 @@ class BookingControllerTest {
     void rejectsEndDateBeforeStartDate() throws Exception {
         mockMvc.perform(post("/api/v1/bookings")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(validRequestWithDates("2026-09-05", "2026-09-01")))
+                        .content(validRequestWithDates(
+                                RENTAL_START_DATE.plusDays(4).toString(), RENTAL_START_DATE.toString())))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error")
                         .value("rentalEndDate must be after rentalStartDate"));
@@ -206,7 +213,7 @@ class BookingControllerTest {
         }
 
         private String validRequest(String paymentMode, String paymentReference) {
-        return validRequestWithDates("2026-09-01", "2026-09-05")
+        return validRequestWithDates(RENTAL_START_DATE.toString(), RENTAL_END_DATE.toString())
             .replace("DIGITAL_WALLET", paymentMode)
             .replace("WALLET123", paymentReference);
     }

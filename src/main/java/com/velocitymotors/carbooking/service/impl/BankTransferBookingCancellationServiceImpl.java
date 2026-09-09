@@ -21,8 +21,8 @@ public class BankTransferBookingCancellationServiceImpl
         implements BankTransferBookingCancellationService {
 
     private final BookingRepository bookingRepository;
-        private final long cancellationMinutes;
-        private final int cancellationBatchSize;
+    private final long cancellationMinutes;
+    private final int cancellationBatchSize;
 
     public BankTransferBookingCancellationServiceImpl(
             BookingRepository bookingRepository,
