@@ -31,14 +31,12 @@ Tests use the `test` profile and a separate H2 database. The H2 console is disab
 ```http
 POST http://localhost:8080/api/v1/bookings
 Content-Type: application/json
-```
 
-```json
 {
   "customerName": "Binu Philip",
   "vehicleId": "VH1001",
-  "rentalStartDate": "2026-09-01T10:00:00",
-  "rentalEndDate": "2026-09-05T10:00:00",
+  "rentalStartDate": "2026-09-15T10:00:00",
+  "rentalEndDate": "2026-09-19T10:00:00",
   "vehicleCategory": "SUV",
   "totalAmount": 500.00,
   "paymentMode": "DIGITAL_WALLET",
@@ -86,9 +84,7 @@ A helper endpoint to manually produce a bank-transfer payment event to the Kafka
 ```http
 POST http://localhost:8080/api/v1/payment-events/bank-transfer
 Content-Type: application/json
-```
 
-```json
 {
   "paymentId": "PAY-10001",
   "senderAccountNumber": "ACC-123456",
@@ -137,7 +133,9 @@ graph TD
   - **JDBC URL:** `jdbc:h2:mem:bookingdb`
   - **Username:** `sa`
   - **Password:** *(empty)*
-- **Actuator Health & Metrics:** `http://localhost:8080/actuator/health`
+- **Actuator Endpoints:**
+  - **Health & Metrics:** `http://localhost:8080/actuator/health`
+  - **Application Beans:** `http://localhost:8080/actuator/beans`
 
 ## Test
 

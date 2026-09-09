@@ -1,5 +1,13 @@
 @carBookingBaseUrl = http://localhost:8080
 
+### Actuator Health
+# @name actuatorHealth
+GET {{carBookingBaseUrl}}/actuator/health
+
+### Actuator Beans
+# @name actuatorBeans
+GET {{carBookingBaseUrl}}/actuator/beans
+
 ### List all bookings
 # @name listBookings
 GET {{carBookingBaseUrl}}/api/v1/bookings?page=0&size=10&sort=bookingId,desc
@@ -12,8 +20,8 @@ Content-Type: application/json
 {
   "customerName": "Binu Philip",
   "vehicleId": "VH1001",
-  "rentalStartDate": "2026-09-01T10:00:00",
-  "rentalEndDate": "2026-09-05T18:00:00",
+  "rentalStartDate": "2026-09-15T10:00:00",
+  "rentalEndDate": "2026-09-19T18:00:00",
   "vehicleCategory": "SUV",
   "totalAmount": 500.00,
   "paymentMode": "DIGITAL_WALLET",
@@ -28,8 +36,8 @@ Content-Type: application/json
 {
   "customerName": "John Smith",
   "vehicleId": "VH1002",
-  "rentalStartDate": "2026-09-10T10:00:00",
-  "rentalEndDate": "2026-09-12T18:00:00",
+  "rentalStartDate": "2026-09-20T10:00:00",
+  "rentalEndDate": "2026-09-22T18:00:00",
   "vehicleCategory": "SEDAN",
   "totalAmount": 250.00,
   "paymentMode": "CASH",
@@ -44,8 +52,8 @@ Content-Type: application/json
 {
   "customerName": "Binu Philip",
   "vehicleId": "VH1001",
-  "rentalStartDate": "2026-09-01T10:00:00",
-  "rentalEndDate": "2026-09-05T18:00:00",
+  "rentalStartDate": "2026-09-15T10:00:00",
+  "rentalEndDate": "2026-09-19T18:00:00",
   "vehicleCategory": "SUV",
   "totalAmount": 500.00,
   "paymentMode": "CREDIT_CARD",
@@ -60,8 +68,8 @@ Content-Type: application/json
 {
   "customerName": "Binu Philip",
   "vehicleId": "VH1001",
-  "rentalStartDate": "2026-09-01T10:00:00",
-  "rentalEndDate": "2026-09-05T18:00:00",
+  "rentalStartDate": "2026-09-15T10:00:00",
+  "rentalEndDate": "2026-09-19T18:00:00",
   "vehicleCategory": "SUV",
   "totalAmount": 500.00,
   "paymentMode": "CREDIT_CARD",
@@ -76,8 +84,8 @@ Content-Type: application/json
 {
   "customerName": "Binu Philip",
   "vehicleId": "VH1001",
-  "rentalStartDate": "2026-09-01T10:00:00",
-  "rentalEndDate": "2026-09-05T18:00:00",
+  "rentalStartDate": "2026-09-15T10:00:00",
+  "rentalEndDate": "2026-09-19T18:00:00",
   "vehicleCategory": "SUV",
   "totalAmount": 500.00,
   "paymentMode": "CREDIT_CARD",
@@ -92,8 +100,8 @@ Content-Type: application/json
 {
   "customerName": "Binu Philip",
   "vehicleId": "VH1001",
-  "rentalStartDate": "2026-09-04T10:00:00",
-  "rentalEndDate": "2026-09-05T18:00:00",
+  "rentalStartDate": "2026-09-20T10:00:00",
+  "rentalEndDate": "2026-09-24T18:00:00",
   "vehicleCategory": "SUV",
   "totalAmount": 500.00,
   "paymentMode": "BANK_TRANSFER",
@@ -108,8 +116,8 @@ Content-Type: application/json
 {
   "customerName": "Binu Philip",
   "vehicleId": "VH1001",
-  "rentalStartDate": "2026-09-01T10:00:00",
-  "rentalEndDate": "2026-09-05T18:00:00",
+  "rentalStartDate": "2026-09-10T10:00:00",
+  "rentalEndDate": "2026-09-14T18:00:00",
   "vehicleCategory": "SUV",
   "totalAmount": 500.00,
   "paymentMode": "BANK_TRANSFER",
@@ -124,8 +132,8 @@ Content-Type: application/json
 {
   "customerName": "Binu Philip",
   "vehicleId": "VH1001",
-  "rentalStartDate": "2026-09-01T10:00:00",
-  "rentalEndDate": "2026-09-23T10:00:00",
+  "rentalStartDate": "2026-09-15T10:00:00",
+  "rentalEndDate": "2026-10-10T10:00:00",
   "vehicleCategory": "SUV",
   "totalAmount": 2200.00,
   "paymentMode": "DIGITAL_WALLET",
@@ -140,8 +148,8 @@ Content-Type: application/json
 {
   "customerName": "Binu Philip",
   "vehicleId": "VH9999",
-  "rentalStartDate": "2026-09-01T10:00:00",
-  "rentalEndDate": "2026-09-05T18:00:00",
+  "rentalStartDate": "2026-09-15T10:00:00",
+  "rentalEndDate": "2026-09-19T18:00:00",
   "vehicleCategory": "SUV",
   "totalAmount": 500.00,
   "paymentMode": "DIGITAL_WALLET",
@@ -156,8 +164,8 @@ Content-Type: application/json
 {
   "customerName": "Binu Philip",
   "vehicleId": "VH1001",
-  "rentalStartDate": "2026-09-01T10:00:00",
-  "rentalEndDate": "2026-09-05T18:00:00",
+  "rentalStartDate": "2026-09-15T10:00:00",
+  "rentalEndDate": "2026-09-19T18:00:00",
   "vehicleCategory": "SUV",
   "totalAmount": 500.00,
   "paymentMode": "UPI",
@@ -172,8 +180,8 @@ Content-Type: application/json
 {
   "customerName": "Binu Philip",
   "vehicleId": "VH1001",
-  "rentalStartDate": "2026-09-01T10:00:00",
-  "rentalEndDate": "2026-09-05T18:00:00",
+  "rentalStartDate": "2026-09-15T10:00:00",
+  "rentalEndDate": "2026-09-19T18:00:00",
   "vehicleCategory": "SUV",
   "totalAmount": 500.00,
   "paymentReference": "PAY001"
@@ -187,8 +195,8 @@ Content-Type: application/json
 {
   "customerName": "Binu Philip",
   "vehicleId": "VH1001",
-  "rentalStartDate": "2026-09-01T10:00:00",
-  "rentalEndDate": "2026-09-05T18:00:00",
+  "rentalStartDate": "2026-09-15T10:00:00",
+  "rentalEndDate": "2026-09-19T18:00:00",
   "vehicleCategory": "SUV",
   "totalAmount": 500.00,
   "paymentMode": "BANK_TRANSFER"
@@ -202,8 +210,8 @@ Content-Type: application/json
 {
   "customerName": "Binu Philip",
   "vehicleId": "VH1001",
-  "rentalStartDate": "2026-09-01T10:00:00",
-  "rentalEndDate": "2026-09-05T18:00:00",
+  "rentalStartDate": "2026-09-15T10:00:00",
+  "rentalEndDate": "2026-09-19T18:00:00",
   "vehicleCategory": "SUV",
   "paymentMode": "BANK_TRANSFER",
   "paymentReference": "BANK003"

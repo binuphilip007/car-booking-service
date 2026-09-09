@@ -42,6 +42,14 @@ booking:
     fixed-delay-ms: 60000
     minutes: 2880
     batch-size: 100
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,beans"
+  endpoint:
+    health:
+      show-details: always
 server:
   port: 8080
 logging:
