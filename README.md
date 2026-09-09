@@ -5,6 +5,7 @@ Car Booking Service implemented as a Spring Boot application featuring an H2 in-
 ## Requirements
 
 - Java 25
+- Spring Boot 4.1.1
 - Maven
 
 ## Run
