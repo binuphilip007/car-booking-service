@@ -8,6 +8,14 @@ GET {{carBookingBaseUrl}}/actuator/health
 # @name actuatorBeans
 GET {{carBookingBaseUrl}}/actuator/beans
 
+### Actuator Thread Dump
+# @name actuatorThreadDump
+GET {{carBookingBaseUrl}}/actuator/threaddump
+
+### Actuator Heap Dump
+# @name actuatorHeapDump
+GET {{carBookingBaseUrl}}/actuator/heapdump
+
 ### List all bookings
 # @name listBookings
 GET {{carBookingBaseUrl}}/api/v1/bookings?page=0&size=10&sort=bookingId,desc

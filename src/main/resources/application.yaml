@@ -46,10 +46,12 @@ management:
   endpoints:
     web:
       exposure:
-        include: "health,info,beans"
+        include: "health,info,beans,threaddump,heapdump"
   endpoint:
     health:
       show-details: always
+    heapdump:
+      access: unrestricted
 server:
   port: 8080
 logging:
